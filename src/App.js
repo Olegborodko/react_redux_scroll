@@ -1,17 +1,41 @@
+import React, { useState } from 'react';
 import { Input } from "./components/Input";
 import { LabelBox } from "./components/LabelBox";
-import { connect, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 function App() {
   const dispatch = useDispatch();
-  const data = useSelector(state => state);
 
-  const handleTextChange = (id, field, value) => {
+  const state = useSelector(state => state);
+  const data = state.data;
+  const currentItem = state.currentItem;
+
+  const [topValue, setTopValue] = useState(currentItem.topText);
+  const [bottomValue, setBottomValue] = useState(currentItem.bottomText);
+
+  console.log('Current state:', state);
+
+  const currentItemChange = (id, topText, bottomText) => {
     dispatch({
-      type: 'UPDATE_TEXT',
+      type: 'CURRENT_ITEM_CHANGE',
       id,
-      [field]: value
+      topText,
+      bottomText
     });
+
+    setTopValue(topText);
+    setBottomValue(bottomText);
+  };
+
+  const handleChange = (event, input) => {
+    if (input === 'top'){
+      setTopValue(event.target.value);
+      currentItemChange(currentItem.id, event.target.value, currentItem.bottomText);
+    }
+    if (input === 'bottom'){
+      setBottomValue(event.target.value);
+      currentItemChange(currentItem.id, currentItem.topText, event.target.value);
+    }
   };
 
   return (
@@ -22,8 +46,14 @@ function App() {
         flexDirection: 'column',
         padding: '10px 0 20px 0',
       }}>
-        <Input />
-        <Input />
+        <Input
+          value={topValue}
+          handleChange={(e) => handleChange(e, 'top')}
+        />
+        <Input
+          value={bottomValue}
+          handleChange={(e) => handleChange(e, 'bottom')}
+        />
       </div>
 
       <div style={{
@@ -38,10 +68,11 @@ function App() {
           {Object.keys(data).slice(0, 23).map(id => {
             return (
               <LabelBox
-                textTop="text"
-                textBottom="text"
+                textTop={data[id].topText}
+                textBottom={data[id].bottomText}
                 key={id}
                 labelTop={id}
+                onElementClick={() => currentItemChange(id, data[id].topText, data[id].bottomText)}
               />
             )
           })}
@@ -52,10 +83,11 @@ function App() {
           {Object.keys(data).slice(24, 47).map(id => {
             return (
               <LabelBox
-                textTop="text"
-                textBottom="text"
+                textTop={data[id].topText}
+                textBottom={data[id].bottomText}
                 key={id}
                 labelBottom={id}
+                onElementClick={() => currentItemChange(id, data[id].topText, data[id].bottomText)}
               />
             )
           })}
