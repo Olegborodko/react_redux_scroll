@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Input } from "./components/Input";
 import { LabelBox } from "./components/LabelBox";
 import { useDispatch, useSelector } from 'react-redux';
@@ -28,15 +28,46 @@ function App() {
   };
 
   const handleChange = (event, input) => {
-    if (input === 'top'){
+    if (input === 'top') {
       setTopValue(event.target.value);
       currentItemChange(currentItem.id, event.target.value, currentItem.bottomText);
     }
-    if (input === 'bottom'){
+    if (input === 'bottom') {
       setBottomValue(event.target.value);
       currentItemChange(currentItem.id, currentItem.topText, event.target.value);
     }
   };
+
+  const containerRef = useRef(null);
+  const [isMouseOver, setIsMouseOver] = useState(false);
+
+  useEffect(() => {
+    const handleWheelScroll = (event) => {
+      if (isMouseOver && containerRef.current) {
+        const scrollDelta = Math.sign(event.deltaY);
+        containerRef.current.scrollLeft += scrollDelta * 40;
+        event.preventDefault();
+      }
+    };
+
+    const handleMouseEnter = () => {
+      setIsMouseOver(true);
+    };
+
+    const handleMouseLeave = () => {
+      setIsMouseOver(false);
+    };
+
+    window.addEventListener('wheel', handleWheelScroll);
+    containerRef.current.addEventListener('mouseenter', handleMouseEnter);
+    containerRef.current.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      window.removeEventListener('wheel', handleWheelScroll);
+      containerRef.current.removeEventListener('mouseenter', handleMouseEnter);
+      containerRef.current.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [isMouseOver]);
 
   return (
     <div className="App">
@@ -61,7 +92,10 @@ function App() {
         flexDirection: 'column',
         overflow: 'scroll',
         padding: '15px 0 15px',
-      }}>
+      }}
+        className="horizontal-scroll-container"
+        ref={containerRef}
+      >
         <div style={{
           display: 'flex',
         }}>
