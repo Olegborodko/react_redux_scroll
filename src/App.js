@@ -1,7 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Input } from "./components/Input";
 import { LabelBox } from "./components/LabelBox";
 import { useDispatch, useSelector } from 'react-redux';
+
+import { factAction } from "./actions/factAction";
+import { currentItemAction } from "./actions/currentItemAction";
 
 function App() {
   const dispatch = useDispatch();
@@ -16,12 +19,7 @@ function App() {
   console.log('Current state:', state);
 
   const currentItemChange = (id, topText, bottomText) => {
-    dispatch({
-      type: 'CURRENT_ITEM_CHANGE',
-      id,
-      topText,
-      bottomText
-    });
+    dispatch(currentItemAction(id, topText, bottomText));
 
     setTopValue(topText);
     setBottomValue(bottomText);
@@ -37,37 +35,6 @@ function App() {
       currentItemChange(currentItem.id, currentItem.topText, event.target.value);
     }
   };
-
-  const containerRef = useRef(null);
-  const [isMouseOver, setIsMouseOver] = useState(false);
-
-  useEffect(() => {
-    const handleWheelScroll = (event) => {
-      if (isMouseOver && containerRef.current) {
-        const scrollDelta = Math.sign(event.deltaY);
-        containerRef.current.scrollLeft += scrollDelta * 40;
-        event.preventDefault();
-      }
-    };
-
-    const handleMouseEnter = () => {
-      setIsMouseOver(true);
-    };
-
-    const handleMouseLeave = () => {
-      setIsMouseOver(false);
-    };
-
-    window.addEventListener('wheel', handleWheelScroll);
-    containerRef.current.addEventListener('mouseenter', handleMouseEnter);
-    containerRef.current.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      window.removeEventListener('wheel', handleWheelScroll);
-      containerRef.current.removeEventListener('mouseenter', handleMouseEnter);
-      containerRef.current.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, [isMouseOver]);
 
   return (
     <div className="App">
@@ -93,8 +60,6 @@ function App() {
         overflow: 'scroll',
         padding: '15px 0 15px',
       }}
-        className="horizontal-scroll-container"
-        ref={containerRef}
       >
         <div style={{
           display: 'flex',
@@ -128,6 +93,21 @@ function App() {
         </div>
       </div>
 
+      <br /><br />
+      <button
+        onClick={async () => {
+          // thunk нужен что-бы собрать кучу запросов в один,
+          // и на основе результата поменять store
+
+          // основные концепции Redux: store, actions и reducers.
+          // Store содержит весь глобальный стейт вашего приложения
+          // Actions - это способ сообщить хранилищу о том, что что-то произошло. Они могут быть синхронными (например, клик на кнопку) или асинхронными (например, запрос на сервер). Это взаимодействие с ui
+          // Reducers - это чистые функции, которые обрабатывают действия и определяют, как изменится состояние хранилища в ответ на действие
+          dispatch(factAction());
+        }}
+      >
+        test .. send request
+      </button>
     </div>
   );
 }

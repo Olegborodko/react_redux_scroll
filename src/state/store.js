@@ -1,4 +1,6 @@
-import { createStore } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
+import rootReducer from '../reducers';
 
 const initObj = () => {
   const objStart = {};
@@ -16,36 +18,9 @@ const initObj = () => {
 const initialState = {
   data: { ...initObj() },
   currentItem: {},
+  fact: '',
 };
 
-const reducer = (state = initialState, action) => {
-  if (action.type === 'CURRENT_ITEM_CHANGE') {
-    state.data[action.id] = {
-      topText: action.topText,
-      bottomText: action.bottomText
-    }
-    return {
-      ...state,
-      currentItem: {
-        id: action.id,
-        topText: action.topText,
-        bottomText: action.bottomText
-      }
-    }
-  }
-  // if (action.type === 'UPDATE_TEXT') {
-  //   return {
-  //     ...state,
-  //     [action.id]: {
-  //       topText: action.topText,
-  //       bottomText: action.bottomText
-  //     }
-  //   };
-  // }
-
-  return state;
-};
-
-const store = createStore(reducer);
+const store = createStore(rootReducer, initialState, applyMiddleware(thunk));
 
 export default store;
